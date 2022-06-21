@@ -1,0 +1,9 @@
+[tools]
+#https://kampfkarren.github.io/selene/selene.html
+selene = { source = "Kampfkarren/selene", version = "x" }
+
+#https://rojo.space/
+rojo = { source = "rojo-rbx/rojo", version = "7" }
+
+#https://wally.run/
+wally = { source = "UpliftGames/wally", version = "0.3.1" }

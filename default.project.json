@@ -1,0 +1,52 @@
+{
+	"name": "default-project",
+	"tree": {
+		"$className": "DataModel",
+
+		"ReplicatedFirst": {
+			"$className": "ReplicatedFirst",
+			"Game": {
+				"$path": "src/ReplicatedFirst"
+			}
+		},
+
+		"ReplicatedStorage": {
+			"$className": "ReplicatedStorage",
+			"Game": {
+				"$path": "src/ReplicatedStorage"
+			},
+
+			"Packages": {
+				"$path": "Packages"
+			},
+
+			"Assets": {
+				"$path": "src/Assets"
+			}
+		},
+
+		"ServerScriptService": {
+			"$className": "ServerScriptService",
+			"Game": {
+				"$path": "src/ServerScriptService"
+			}
+		},
+
+		"ServerStorage": {
+			"$className": "ServerStorage",
+			"Game": {
+				"$path": "src/ServerStorage"
+			}
+		},
+
+		"StarterPlayer": {
+			"$className": "StarterPlayer",
+			"StarterPlayerScripts": {
+				"$className": "StarterPlayerScripts",
+				"Game": {
+					"$path": "src/StarterPlayerScripts"
+				}
+			}
+		}
+	}
+}
