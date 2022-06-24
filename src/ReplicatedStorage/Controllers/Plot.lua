@@ -12,6 +12,9 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Knit = require(ReplicatedStorage.Packages.Knit)
 local State = require(ReplicatedStorage.Game.Modules.State)
+local RoduxWatcher = require(ReplicatedStorage.Game.Shared.RoduxWatcher)
+
+local watcher = RoduxWatcher(State)
 
 local Controller = Knit.CreateController({
 	Name = "PlotController",
@@ -19,24 +22,17 @@ local Controller = Knit.CreateController({
 	MyPlot = nil,
 })
 
-function Controller:KnitStart()
-	local DataController = Knit.GetController("DataController")
+function Controller:KnitStart() end
 
-	-- feels jank
-	DataController.DataChanged:Connect(function(key, value)
-		if key == "GridObjects" then
-			if self.MyPlot == nil then
-				return
-			end
-
-			State:dispatch({
-				type = "SetObjects",
-				objects = value,
-			})
-		end
+function Controller:KnitInit()
+	watcher(function(state)
+		return state.data.GridObjects
+	end, function(gridObjects)
+		State:dispatch({
+			type = "SetObjects",
+			objects = gridObjects,
+		})
 	end)
 end
-
-function Controller:KnitInit() end
 
 return Controller

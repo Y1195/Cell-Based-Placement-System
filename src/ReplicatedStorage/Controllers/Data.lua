@@ -14,12 +14,9 @@ local Http = game:GetService("HttpService")
 local Knit = require(ReplicatedStorage.Packages.Knit)
 local State = require(ReplicatedStorage.Game.Modules.State)
 local Sift = require(ReplicatedStorage.Packages.sift)
-local Signal = require(ReplicatedStorage.Packages.Signal)
 
 local Controller = Knit.CreateController({
 	Name = "DataController",
-
-	DataChanged = Signal.new(),
 })
 
 function Controller:KnitStart() end
@@ -35,8 +32,6 @@ function Controller:KnitInit()
 			key = key,
 			value = value,
 		})
-
-		self.DataChanged:Fire(key, value)
 
 		print(string.format("Got new player data %s: %s", key, Http:JSONEncode(value)))
 	end
