@@ -13,7 +13,7 @@ Video Demo: https://youtu.be/P5aNFn9Eogs
 ---
 
 There are some comments left throughout the project but nothing is heavily documented.  
-A main goal of this project is showing the seperation of objects and data.
+A main goal of this project is showing a little bit on how these libraries can be used and showing the separation of objects and data.
 
 ### Fusion
 Fusion handles everything visual in the project. From the UI on the client to placing the object in workspace on the server. You can detach Fusion and the placement system would still function, you just would not see anything happening.  
@@ -44,6 +44,6 @@ Throttle replicating objects
 
 ---
 
-This project is inteded to be a resource to learn from. I do not recommend building a game using this as a template.
+This project is intended to be a resource to learn from. I do not recommend building a game using this as a template.
 
 Do point out anything that I could have done differently.
