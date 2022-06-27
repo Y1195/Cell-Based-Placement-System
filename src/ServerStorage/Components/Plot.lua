@@ -24,6 +24,8 @@ local Grid = GridModules.Grid
 local GridUtil = GridModules.GridUtil
 local CellObject = GridModules.CellObject
 
+local UPDATE_DELAY = 0.1
+
 local Class = Component.new({
 	Tag = "Plot",
 	Ancestors = { workspace },
@@ -142,8 +144,12 @@ function Class:Construct()
 		folder:Destroy()
 	end)
 	-- watch for plot state
+	local updateThread = task.delay(UPDATE_DELAY, function() end)
 	local function onChange(newObjects)
-		self._objects:set(newObjects)
+		task.cancel(updateThread)
+		updateThread = task.delay(UPDATE_DELAY, function()
+			self._objects:set(newObjects)
+		end)
 	end
 
 	local selector = function(state)

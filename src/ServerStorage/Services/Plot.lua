@@ -158,7 +158,7 @@ function Service:KnitInit()
 			end)
 			-- update plot
 			local plot = requestResult.plot
-			State:dispatch({ -- TODO throttle
+			State:dispatch({
 				type = "AddObject",
 				key = plot.Key,
 				serialized = serialized,
