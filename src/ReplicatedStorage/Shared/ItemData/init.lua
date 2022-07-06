@@ -3,10 +3,14 @@ export type ItemData = {
 	Id: number,
 	Name: string,
 
+	Type: "Placeable" | "Tool",
+
 	Size: Vector2,
 
+	ToolType: "Delete" | string,
+
 	Module: ModuleScript,
-	Prefab: Model,
+	Prefab: Model?,
 }
 
 local itemData: {[number]: ItemData} = {}

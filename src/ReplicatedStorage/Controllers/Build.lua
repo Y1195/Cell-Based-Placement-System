@@ -51,7 +51,14 @@ local Controller = Knit.CreateController({
 	Name = "BuildController",
 })
 
-function Controller:CheckCanPlace(grid: Grid, position: Vector2, id: number): boolean
+function Controller:CheckCanPlace(position: Vector2, id: number): boolean
+	local plot = PlotController.MyPlot
+	if not plot then
+		return false
+	end
+
+	local grid = PlotController.MyPlot.Grid
+
 	local baseItemData: ItemData.ItemData = ItemData[id]
 
 	local buildState = State:getState().build
@@ -88,38 +95,6 @@ function Controller:StopBuild()
 		type = "SetBuild",
 		itemId = Sift.None,
 	})
-end
-
-function Controller:_updatePrefabPosition(delta: number)
-	debug.profilebegin("UPDATE PREFAB")
-	if PlotController.MyPlot == nil then
-		return
-	end
-
-	local prefab: Model = _janitor:Get("Prefab")
-	prefab.PrimaryPart.PivotOffset = CFrame.new(-prefab.PrimaryPart.Size / 2)
-
-	local grid = PlotController.MyPlot.Grid
-
-	local buildState = State:getState().build
-	local itemId: number = buildState.itemId
-
-	if itemId == nil then
-		return
-	end
-
-	local baseItemData: ItemData.ItemData = ItemData[itemId]
-
-	local rotation: number = buildState.rotation
-	local rotationOffset = GridUtil.GetRotationOffset(baseItemData.Id, GridUtil.Directions[rotation + 1])
-	local position: Vector2 = buildState.position
-	local placedObjectWorldCFrame: CFrame = grid:GetWorldCFrame(position)
-		* CFrame.new(Vector3.new(rotationOffset.X, 0, rotationOffset.Y) * grid.cellSize)
-		* CFrame.Angles(0, math.pi / 2 * rotation, 0)
-
-	local goal = prefab:GetPivot():Lerp(placedObjectWorldCFrame, delta * PREFAB_SPEED)
-	prefab:PivotTo(goal)
-	debug.profileend()
 end
 
 function Controller:KnitStart()
@@ -218,7 +193,7 @@ function Controller:KnitStart()
 
 		local itemId = State:getState().build.itemId
 		if itemId ~= nil then
-			local canPlace = self:CheckCanPlace(grid, position, itemId)
+			local canPlace = self:CheckCanPlace(position, itemId)
 			State:dispatch({
 				type = "SetCanPlace",
 				canPlace = canPlace,
@@ -230,6 +205,38 @@ end
 function Controller:KnitInit()
 	PlotController = Knit.GetController("PlotController")
 	PlotService = Knit.GetService("PlotService")
+
+	local function updatePrefabPosition(delta: number)
+		debug.profilebegin("UPDATE PREFAB")
+		if PlotController.MyPlot == nil then
+			return
+		end
+
+		local prefab: Model = _janitor:Get("Prefab")
+		prefab.PrimaryPart.PivotOffset = CFrame.new(-prefab.PrimaryPart.Size / 2)
+
+		local grid = PlotController.MyPlot.Grid
+
+		local buildState = State:getState().build
+		local itemId: number = buildState.itemId
+
+		if itemId == nil then
+			return
+		end
+
+		local baseItemData: ItemData.ItemData = ItemData[itemId]
+
+		local rotation: number = buildState.rotation
+		local rotationOffset = GridUtil.GetRotationOffset(baseItemData.Id, GridUtil.Directions[rotation + 1])
+		local position: Vector2 = buildState.position
+		local placedObjectWorldCFrame: CFrame = grid:GetWorldCFrame(position)
+			* CFrame.new(Vector3.new(rotationOffset.X, 0, rotationOffset.Y) * grid.cellSize)
+			* CFrame.Angles(0, math.pi / 2 * rotation, 0)
+
+		local goal = prefab:GetPivot():Lerp(placedObjectWorldCFrame, delta * PREFAB_SPEED)
+		prefab:PivotTo(goal)
+		debug.profileend()
+	end
 
 	local function itemIdChanged(id: number)
 		local baseItemData: ItemData.ItemData = ItemData[id]
@@ -247,14 +254,14 @@ function Controller:KnitInit()
 
 		Run:UnbindFromRenderStep("UpdatePrefabPosition") -- just in case
 		Run:BindToRenderStep("UpdatePrefabPosition", Enum.RenderPriority.Camera.Value, function(delta: number)
-			self:_updatePrefabPosition(delta)
+			updatePrefabPosition(delta)
 		end)
 		_janitor:Add(function()
 			adorneeState:set(nil)
 			Run:UnbindFromRenderStep("UpdatePrefabPosition")
 		end)
 
-		self:_updatePrefabPosition(1 / PREFAB_SPEED)
+		updatePrefabPosition(1 / PREFAB_SPEED)
 		adorneeState:set(prefab)
 
 		prefab.Parent = workspace.CurrentCamera
@@ -264,8 +271,9 @@ function Controller:KnitInit()
 		watcher(function(state)
 			return state.build.itemId
 		end, function(itemId)
+			_janitor:Cleanup()
 			if itemId == nil then
-				_janitor:Cleanup()
+				return
 			else
 				itemIdChanged(itemId)
 			end
@@ -323,6 +331,26 @@ function Controller:KnitInit()
 			canPlaceState:set(canPlace)
 		end)
 	end
+	-- watch for position
+	-- do
+	-- 	watcher(function(state)
+	-- 		return state.build.position
+	-- 	end, function(position)
+	-- 		-- local grid = PlotController.MyPlot.Grid
+	-- 		-- if not grid then
+	-- 		-- 	return
+	-- 		-- end
+
+	-- 		local itemId = State:getState().build.itemId
+	-- 		if itemId ~= nil then
+	-- 			local canPlace = self:CheckCanPlace(position, itemId)
+	-- 			State:dispatch({
+	-- 				type = "SetCanPlace",
+	-- 				canPlace = canPlace,
+	-- 			})
+	-- 		end
+	-- 	end)
+	-- end
 	-- create hotbar ui
 	local hotbarFrame: Frame = UI.Hotbar({
 		hotbarItems = hotbarItems,

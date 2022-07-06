@@ -30,11 +30,16 @@ return function(props)
 
 			Fusion.ComputedPairs(hotbarItems, function(index: number, id: number)
 				local baseItemData = ItemData[id]
+
+				local Current = Fusion.State()
 				local prefab = baseItemData.Prefab
-				prefab = prefab:Clone()
+				if prefab then
+					prefab = prefab:Clone()
+					Current:set(prefab)
+				end
 
 				local Icon: ViewportFrame = Viewport({
-					Current = Fusion.State(prefab),
+					Current = Current,
 					Fov = Fusion.State(20),
 				})
 

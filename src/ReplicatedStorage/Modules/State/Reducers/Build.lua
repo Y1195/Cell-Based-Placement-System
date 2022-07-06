@@ -38,6 +38,12 @@ local reducer = Rodux.createReducer(initialState, {
 			canPlace = action.canPlace,
 		})
 	end,
+
+	SetMode = function(state, action)
+		return Sift.Dictionary.merge(state, {
+			mode = action.mode,
+		})
+	end,
 })
 
 return reducer

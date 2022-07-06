@@ -116,6 +116,9 @@ function Class:Construct()
 
 		prefab:PivotTo(placedObjectWorldCFrame)
 		prefab.PrimaryPart.PivotOffset = CFrame.new(0, -prefab.PrimaryPart.Size / 2, 0)
+		-- id is already set
+		prefab:SetAttribute("Position", position)
+		prefab:SetAttribute("Rotation", rotation)
 
 		local cellObject = CellObject.new(prefab, position, GridUtil.Directions[rotation + 1])
 		-- place object in data
