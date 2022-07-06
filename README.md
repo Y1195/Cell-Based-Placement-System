@@ -36,11 +36,13 @@ Handles data on the client. Updates the data state on the client.
 This updates the plot state whenever Data state `GridObjects` updates.
 So the Plot reducer is a copy of `GridObjects` in the Data reducer.
 
+### PlotConfig
+Here is where you change the grid's cell size. Default is 4.
+
 ---
 
 ## TODO
 Removing objects from the plot  
-Throttle replicating objects
 
 ---
 

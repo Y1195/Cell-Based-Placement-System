@@ -19,6 +19,7 @@ local State = require(ReplicatedStorage.Game.Modules.State)
 local Fusion = require(ReplicatedStorage.Packages.Fusion)
 local ItemData = require(ReplicatedStorage.Game.Shared.ItemData)
 local Sift = require(ReplicatedStorage.Packages.sift)
+local PlotConfig = require(ReplicatedStorage.Game.Shared.PlotConfig)
 local Grid = GridModules.Grid
 local GridUtil = GridModules.GridUtil
 local CellObject = GridModules.CellObject
@@ -51,7 +52,7 @@ function Class:StartForLocalPlayer()
 	local origin = gridModel:GetPivot()
 	local plotRoot = gridModel.PrimaryPart
 	local size = Vector2.new(plotRoot.Size.X, plotRoot.Size.Z)
-	local grid = Grid.new(origin, size, 4)
+	local grid = Grid.new(origin, size, PlotConfig.CellSize)
 	self.Grid = grid
 	localJanitor:Add(function()
 		self.Grid:Destroy()

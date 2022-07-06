@@ -19,11 +19,9 @@ local ItemData = require(ReplicatedStorage.Game.Shared.ItemData)
 local GridModules = require(ReplicatedStorage.Game.Shared.Grid)
 local State = require(ServerStorage.Game.Modules.State)
 local Sift = require(ReplicatedStorage.Packages.sift)
+local PlotConfig = require(ReplicatedStorage.Game.Shared.PlotConfig)
 local GridUtil = GridModules.GridUtil
 local UserService
--- arbitrary values
-local MAX_GRID_SIZE_X = 100
-local MAX_GRID_SIZE_Y = 100
 
 local Service = Knit.CreateService({
 	Name = "PlotService",
@@ -102,16 +100,11 @@ end
 function Service:KnitInit()
 	UserService = Knit.GetService("UserService")
 
-	local function clientRequestPlaceObject(user, id: number, position: Vector2, rotation: number)
-		-- check if client has plot
-		local plot = self:GetPlotForUser(user)
-		if not plot then
-			return { success = false, error = string.format("User %s does not have a plot.", tostring(user)) }
-		end
+	local function requestPlaceObject(plot, id: number, position: Vector2, rotation: number)
 		-- check valid item
-		local baseItemData: ItemData.ItemData = ItemData[id]
+		local baseItemData = ItemData[id]
 		if not baseItemData then
-			return { success = false, error = string.format("User %s attempted to place invalid item", tostring(user)) }
+			return { success = false, error = "Attempted to place invalid item" }
 		end
 		-- client is trying to place a valid object at a position
 		local grid = plot.Grid
@@ -124,17 +117,23 @@ function Service:KnitInit()
 		if not canPlace then
 			return {
 				success = false,
-				error = string.format("User %s attempted to place item at invalid position", tostring(user)),
+				error = "Attempted to place item at invalid position",
 			}
 		end
 		-- client can place
-		return { success = true, plot = plot, gridPositionList = gridPositionList, baseItemData = baseItemData }
+		return { success = true }
 	end
 
 	self.Client.PlaceObject:Connect(function(player: Player, id: number, position: Vector2, rotation: number)
+		-- check is user is loaded
 		local user = UserService:GetUser(player)
 		if not user then
 			UserService:Kick(player, "Data not loaded")
+			return
+		end
+		-- check if user has a plot
+		local plot = self:GetPlotForUser(user)
+		if not plot then
 			return
 		end
 		-- type checks
@@ -143,21 +142,20 @@ function Service:KnitInit()
 		assert(typeof(rotation) == "number", "")
 
 		rotation = math.clamp(rotation, 0, 3)
-		local x = math.clamp(position.X, 0, MAX_GRID_SIZE_X)
-		local y = math.clamp(position.Y, 0, MAX_GRID_SIZE_Y)
+		local x = math.clamp(position.X, 0, plot.Grid.X)
+		local y = math.clamp(position.Y, 0, plot.Grid.Y)
 		position = Vector2.new(x, y)
 
-		local requestResult = clientRequestPlaceObject(user, id, position, rotation)
+		local requestResult = requestPlaceObject(plot, id, position, rotation)
 		if requestResult.success then
 			-- client can place valid item at valid position.
-			local baseItemData = requestResult.baseItemData
+			local baseItemData = ItemData[id]
 			local serialized = GridUtil.SerializeCell(baseItemData.Id, position, rotation)
 			-- update data
 			user:UpdateData("GridObjects", function(gridObjects)
 				return Sift.Array.push(gridObjects, serialized)
 			end)
 			-- update plot
-			local plot = requestResult.plot
 			State:dispatch({
 				type = "AddObject",
 				key = plot.Key,
